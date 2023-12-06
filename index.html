@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>ToDo リスト</h2>
+    <input id="taskName" type="text" placeholder="タスク">
+    <input id="estimateTime" type="number" placeholder="分数">
+    <button onclick="addTask()">追加</button>
+    <br/><br/>
+    <div id="todoList"></div>
+    <h3>終了予定時刻: <span id="endTime"></span></h3>
+    <script>
+        let todoList = [];
+        let endTime = new Date();
+
+        function addTask() {
+            const taskName = document.getElementById('taskName').value;
+            const estimateTime = document.getElementById('estimateTime').value;
+
+            endTime.setMinutes(endTime.getMinutes() + parseInt(estimateTime));
+            
+            todoList.push({
+                id: new Date().getTime(), 
+                taskName: taskName, 
+                estimateTime: estimateTime, 
+                isCompleted: false, 
+                startDate: null,
+                endDate: null
+            });
+
+            document.getElementById('endTime').textContent = endTime.toLocaleTimeString();
+
+            refreshDisplay();
+        }
+
+        function clickTask(id) {
+            const task = todoList.find(todo => todo.id === id);
+            if (task.startDate === null) {
+                task.startDate = new Date();
+            } else {
+                task.endDate = new Date();
+                task.isCompleted = true;
+
+                const actualTime = (task.endDate - task.startDate)/60000;
+                endTime.setMinutes(endTime.getMinutes() - task.estimateTime + actualTime);
+                document.getElementById('endTime').textContent = endTime.toLocaleTimeString();
+            }
+            refreshDisplay();
+        }
+
+        function refreshDisplay() {
+            const listDiv = document.getElementById('todoList');
+            listDiv.innerHTML = '';
+
+            todoList.forEach(todo => {
+                const taskDiv = document.createElement('div');
+                taskDiv.innerHTML = todo.taskName + '(' + todo.estimateTime + '分)';
+                taskDiv.style.opacity = todo.isCompleted ? 0.5 : 1;
+                taskDiv.onclick = () => clickTask(todo.id);
+                listDiv.appendChild(taskDiv);
+            });
+
+            document.getElementById('taskName').value = '';
+            document.getElementById('estimateTime').value = '';
+        }
+    </script>
+</body>
+</html>
